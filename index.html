@@ -240,7 +240,7 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
       <div class="yc" aria-labelledby="yc-title">
         <div class="yc-head">
           <h2 id="yc-title">Screening de un artículo</h2>
-          <span class="mono" id="yc-id"></span>
+          <span class="mono" id="yc-id">Detección RAM</span>
         </div>
         <div class="cases" role="group" aria-label="Elegir ejemplo">
           <button type="button" id="c0" data-i="0" aria-pressed="true">Con RAM</button>
@@ -248,9 +248,9 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
           <button type="button" id="c2" data-i="2" aria-pressed="false">Artículo repetido</button>
         </div>
         <div class="fields">
-          <div class="field"><small>Término buscado</small><div id="f-term"></div></div>
-          <div class="field"><small>PMID</small><div id="f-pmid"></div></div>
-          <div class="field full"><small>Artículo</small><div id="f-art"></div></div>
+          <div class="field"><small>Término buscado</small><div id="f-term">tacrolimus</div></div>
+          <div class="field"><small>PMID</small><div id="f-pmid"><a href="https://pubmed.ncbi.nlm.nih.gov/42300120/" target="_blank" rel="noopener">42300120</a></div></div>
+          <div class="field full"><small>Artículo</small><div id="f-art">Estudio sobre la exposición a tacrolimus y la aparición de lesión renal aguda.</div></div>
         </div>
         <button type="button" class="run" id="run">Ejecutar el escenario</button>
         <div class="panel">
@@ -284,7 +284,19 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
               <thead>
                 <tr><th>PMID</th><th>Fármaco</th><th>Reacción descrita</th><th>Gravedad</th><th>Revisión</th></tr>
               </thead>
-              <tbody id="rows"></tbody>
+              <tbody id="rows">
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42460731/" target="_blank" rel="noopener">42460731</a></td><td>Fenitoína</td><td class="reac">Hiperostosis difusa de la bóveda craneal, remodelación ósea craneal</td><td><span class="pill media">Media</span></td><td><span class="pill comp">Comprobado</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42485011/" target="_blank" rel="noopener">42485011</a></td><td>Fármacos antiepilépticos</td><td class="reac">Síndrome de Stevens-Johnson, necrólisis epidérmica tóxica</td><td><span class="pill alta">Alta</span></td><td><span class="pill comp">Comprobado</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42300120/" target="_blank" rel="noopener">42300120</a></td><td>Tacrolimus</td><td class="reac">Lesión renal aguda (AKI)</td><td><span class="pill alta">Alta</span></td><td><span class="pill comp">Comprobado</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42149737/" target="_blank" rel="noopener">42149737</a></td><td>NSAIDs/paracetamol</td><td class="reac">Hipersensibilidad</td><td><span class="pill media">Media</span></td><td><span class="pill comp">Comprobado</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42136687/" target="_blank" rel="noopener">42136687</a></td><td>Lenvatinib plus Pembrolizumab</td><td class="reac">Estomatitis, síndrome mano-pie, artritis, hipotiroidismo, anorexia, fatiga, fiebre</td><td><span class="pill media">Media</span></td><td><span class="pill comp">Comprobado</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42136977/" target="_blank" rel="noopener">42136977</a></td><td>Pembrolizumab</td><td class="reac">Toxicidad mediada por el sistema inmune (elevación de troponina T y afectación muscular)</td><td><span class="pill media">Media</span></td><td><span class="pill comp">Comprobado</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42131669/" target="_blank" rel="noopener">42131669</a></td><td>Inmunosupresores</td><td class="reac">Trastorno linfoproliferativo postrasplante (PTLD), linfoma difuso de células B grandes (DLBCL)</td><td><span class="pill alta">Alta</span></td><td><span class="pill pend">Pendiente</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42125827/" target="_blank" rel="noopener">42125827</a></td><td>Vandetanib</td><td class="reac">Alteraciones dermatoscópicas de nevos melanocíticos</td><td><span class="pill media">Media</span></td><td><span class="pill pend">Pendiente</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42129168/" target="_blank" rel="noopener">42129168</a></td><td>Maveropepimut-S, pembrolizumab, ciclofosfamida</td><td class="reac">Reacciones en el sitio de inyección</td><td><span class="pill baja">Baja</span></td><td><span class="pill pend">Pendiente</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42112045/" target="_blank" rel="noopener">42112045</a></td><td>Linezolid, rifampicina, fluoroquinolonas, trimetoprima-sulfametoxazol, amoxicilina-clavulanato, tetraciclinas, amoxicilina</td><td class="reac">Eventos gastrointestinales, hiperpotasemia, nefrotoxicidad, supresión de la médula ósea</td><td><span class="pill alta">Alta</span></td><td><span class="pill pend">Pendiente</span></td></tr>
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42112729/" target="_blank" rel="noopener">42112729</a></td><td>Prednisolona, dexametasona, levofloxacino</td><td class="reac">Eventos neurológicos, eventos gastrointestinales, eventos hepáticos</td><td><span class="pill media">Media</span></td><td><span class="pill pend">Pendiente</span></td></tr>
+</tbody>
             </table>
           </div>
           <p class="caption">Artículos registrados con enlace a PubMed, del más reciente al más antiguo. Instantánea de la base a 28 de octubre de 2026.</p>
