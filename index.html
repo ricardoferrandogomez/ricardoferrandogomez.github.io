@@ -475,9 +475,25 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
     li.querySelector(".body").innerHTML = '<p>' + esc(msg) + '</p>';
   }
 
-  function analyze(pmid, farmaco) {
+  var ERRORS = {
+    gemini: "Gemini está saturado en este momento y no ha podido analizar el artículo. Vuelve a buscar en unos minutos.",
+    formato: "Gemini respondió en un formato inesperado, así que el artículo no se ha clasificado.",
+    pubmed: "PubMed no devolvió el abstract de este artículo.",
+    airtable: "No se pudo consultar o guardar en Airtable."
+  };
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function analyze(pmid, farmaco, attempt) {
+    attempt = attempt || 1;
     var url = HOOK + "?pmid=" + encodeURIComponent(pmid) + "&farmaco=" + encodeURIComponent(farmaco);
-    return fetchJSON(url, 120000);
+    return fetchJSON(url, 120000).then(function (d) {
+      if (d && d.error) {
+        if ((d.error === "gemini" || d.error === "pubmed") && attempt < 2) {
+          return wait(5000).then(function () { return analyze(pmid, farmaco, attempt + 1); });
+        }
+        var err = new Error("make"); err.code = d.error; throw err;
+      }
+      return d;
+    });
   }
 
   function run(farmaco) {
@@ -507,9 +523,10 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
           return chain.then(function () {
             return analyze(pair[0], farmaco).then(function (d) { counts[fill(pair[1], d)]++; }, function (e) {
               counts.err++;
-              fail(pair[1], e && e.message === "no-json"
-                ? "Make no devolvió un resultado para este artículo. Puede que el modelo no haya respondido en el formato esperado."
-                : "No se pudo contactar con Make. Puede que se hayan agotado las operaciones gratuitas de este mes.");
+              fail(pair[1], e && e.code && ERRORS[e.code] ? ERRORS[e.code]
+                : e && e.message === "no-json"
+                ? "Make no devolvió un resultado para este artículo. Puede que se hayan agotado las operaciones gratuitas de este mes."
+                : "No se pudo contactar con Make. Inténtalo de nuevo en unos minutos.");
             });
           });
         }, Promise.resolve());
