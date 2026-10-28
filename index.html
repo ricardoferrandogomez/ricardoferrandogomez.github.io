@@ -247,7 +247,7 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
         <div class="facts">
           <div><b id="n-total">9</b><span>artículos con sospecha de RAM registrados</span></div>
           <div><b>6</b><span>ya comprobados en revisión farmacéutica</span></div>
-          <div><b>15 min</b><span>entre ejecuciones del escenario programado</span></div>
+          <div><b>1 vez al día</b><span>se ejecuta el escenario programado, cada mañana</span></div>
         </div>
       </div>
 
@@ -316,7 +316,7 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
       <div class="block-grid">
         <div class="side">
           <h2 id="flujo-t">Cómo funciona</h2>
-          <p>Los módulos del escenario "Detección RAM", en el orden en que se ejecutan. El buscador de esta página usa una versión con webhook: el navegador hace la búsqueda en PubMed y envía a Make cada artículo, que devuelve el resultado a la página.</p>
+          <p>Los módulos del escenario "Detección RAM", en el orden en que se ejecutan. Está programado para ejecutarse una vez al día, a las 8:00. El buscador de esta página usa una versión con webhook: el navegador hace la búsqueda en PubMed y envía a Make cada artículo, que devuelve el resultado a la página.</p>
         </div>
         <ol class="flow">
           <li><div><h3>Búsqueda en PubMed</h3><div class="mod">HTTP · eutils/esearch.fcgi</div><p>Consulta la base de datos de PubMed con el nombre del fármaco vigilado (por ejemplo, tacrolimus) y recupera los PMID de hasta cinco artículos publicados en los últimos 30 días.</p></div></li>
