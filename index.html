@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ricardo Ferrando Gómez · Detector de RAM en literatura con Make, Gemini y Airtable</title>
+<meta name="description" content="Ricardo Ferrando Gómez, farmacéutico. Screening automático de literatura en PubMed para detectar reacciones adversas a medicamentos (RAM) con Make, Gemini y Airtable, con revisión farmacéutica.">
+<meta name="author" content="Ricardo Ferrando Gómez">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_ES">
+<meta property="og:title" content="Ricardo Ferrando Gómez · Detector de RAM en literatura con Make, Gemini y Airtable">
+<meta property="og:description" content="Ricardo Ferrando Gómez, farmacéutico. Screening automático de literatura en PubMed para detectar reacciones adversas a medicamentos (RAM) con Make, Gemini y Airtable, con revisión farmacéutica.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Ricardo Ferrando Gómez","jobTitle":"Farmacéutico","email":"mailto:ricardoferrandogomez@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Albacete","addressCountry":"ES"},"knowsAbout":["Farmacovigilancia","Reacciones adversas a medicamentos","Screening de literatura","PubMed","Make","Airtable","Gemini","Automatización"]}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: portada con la ficha de screening (amarillo farmacovigilancia) como demo viva; debajo, caso de estudio en columna de lectura con la base real */
+:root {
+  --paper: #F6F7F4;
+  --card: #FFFFFF;
+  --ink: #14211F;
+  --muted: #586664;
+  --line: #D8DEDA;
+  --yellow: #F2C12E;
+  --yellow-soft: #FBEFC4;
+  --yellow-ink: #2E2400;
+  --teal: #0F6B63;
+  --teal-soft: #DDEEEB;
+  --danger: #A9332A;
+  --danger-soft: #F6DEDB;
+  --warn: #8A5A00;
+  --warn-soft: #F8EBCF;
+  --ok: #2C6E47;
+  --ok-soft: #DCEEE2;
+  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1514; --card: #151F1D; --ink: #E6EDEB; --muted: #94A4A0; --line: #273432;
+    --yellow: #E6B826; --yellow-soft: #3A3115; --yellow-ink: #1A1400;
+    --teal: #5DC3B6; --teal-soft: #173431; --danger: #F08074; --danger-soft: #3B1F1C;
+    --warn: #E7B85A; --warn-soft: #362A12;
+    --ok: #74C792; --ok-soft: #18321F; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1514; --card: #151F1D; --ink: #E6EDEB; --muted: #94A4A0; --line: #273432;
+  --yellow: #E6B826; --yellow-soft: #3A3115; --yellow-ink: #1A1400;
+  --teal: #5DC3B6; --teal-soft: #173431; --danger: #F08074; --danger-soft: #3B1F1C;
+  --warn: #E7B85A; --warn-soft: #362A12;
+  --ok: #74C792; --ok-soft: #18321F; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: light; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-body); font-size: 17px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1120px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.08; margin: 0; }
+p { margin: 0; }
+a { color: var(--teal); }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 4px; }
+.label { font-family: var(--f-mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+
+/* Cabecera */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 22px; border-bottom: 1px solid var(--line); }
+.who { font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; }
+.who span { color: var(--muted); font-weight: 500; }
+.top nav { display: flex; gap: 20px; flex-wrap: wrap; font-family: var(--f-display); font-size: 0.95rem; }
+.top nav a { color: var(--ink); text-decoration: none; }
+.top nav a:hover { color: var(--teal); }
+
+/* Portada */
+.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; padding-block: 56px 64px; }
+.hero > * { min-width: 0; }
+.hero h1 { font-size: clamp(2.2rem, 4.6vw, 3.6rem); font-weight: 800; letter-spacing: -0.02em; margin-top: 14px; }
+.hero h1 em { font-style: normal; background: linear-gradient(transparent 62%, var(--yellow) 62%); padding: 0 2px; }
+.hero .lede { margin-top: 22px; font-size: 1.12rem; color: var(--muted); max-width: 34em; }
+.stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+.chip { font-family: var(--f-mono); font-size: 0.78rem; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); }
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); }
+.facts > div { min-width: 0; }
+.facts b { display: block; font-family: var(--f-display); font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.facts span { font-size: 0.92rem; color: var(--muted); line-height: 1.4; display: block; }
+
+/* Ficha amarilla (demo) */
+.yc { background: var(--yellow); color: var(--yellow-ink); border-radius: 6px; padding: 20px; box-shadow: 0 1px 0 rgba(0,0,0,.08), 0 18px 40px -24px rgba(60,45,0,.55); }
+.yc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; border-bottom: 1.5px solid rgba(46,36,0,.35); padding-bottom: 10px; }
+.yc-head h2 { font-size: 1.15rem; font-weight: 800; }
+.yc-head .mono { opacity: .75; font-size: 0.8rem; }
+.cases { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+.cases button { font: 500 0.8rem var(--f-mono); color: var(--yellow-ink); background: transparent; border: 1.5px solid rgba(46,36,0,.4); border-radius: 4px; padding: 5px 10px; cursor: pointer; }
+.cases button[aria-pressed="true"] { background: var(--yellow-ink); color: var(--yellow); border-color: var(--yellow-ink); }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-top: 14px; }
+.field { border-bottom: 1px dashed rgba(46,36,0,.4); padding-bottom: 4px; min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+.field small { display: block; font: 500 0.66rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+.field div { font-size: 0.97rem; line-height: 1.4; overflow-wrap: anywhere; }
+.field a { color: var(--yellow-ink); }
+.run { margin-top: 16px; width: 100%; font: 700 1rem var(--f-display); background: var(--yellow-ink); color: var(--yellow); border: 0; border-radius: 4px; padding: 12px; cursor: pointer; }
+.run:disabled { opacity: .6; cursor: progress; }
+
+.panel { margin-top: 14px; padding: 14px; background: var(--card); color: var(--ink); border-radius: 4px; display: grid; gap: 12px; }
+.pipe { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.pipe li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; font-size: 0.88rem; line-height: 1.3; color: var(--muted); }
+.pipe li > span:nth-child(2) { min-width: 0; }
+.pipe li .dot { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; font: 500 0.7rem var(--f-mono); }
+.pipe li .t { font-family: var(--f-mono); font-size: 0.72rem; text-align: right; max-width: 15em; }
+.pipe li.active { color: var(--ink); }
+.pipe li.active .dot { border-color: var(--teal); color: var(--teal); animation: pulse 0.9s ease-in-out infinite; }
+.pipe li.done { color: var(--ink); }
+.pipe li.done .dot { background: var(--teal); border-color: var(--teal); color: var(--card); }
+.pipe li.stop { color: var(--ink); }
+.pipe li.stop .dot { background: var(--danger); border-color: var(--danger); color: var(--card); }
+.pipe li.stop .t { color: var(--danger); }
+.pipe li.skip { opacity: .45; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 5px var(--teal-soft); } }
+.json { margin: 0; padding: 10px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; font: 0.76rem/1.5 var(--f-mono); white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink); }
+.json .k { color: var(--teal); }
+.json-label { font: 500 0.66rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: -6px; }
+.note { margin-top: 10px; font: 0.72rem/1.4 var(--f-mono); opacity: .78; }
+
+/* Secciones */
+section.block { padding-block: 64px; border-top: 1px solid var(--line); }
+.block-grid { display: grid; grid-template-columns: 260px 1fr; gap: 40px; }
+.block-grid > * { min-width: 0; }
+.block h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; }
+.block .side p { margin-top: 12px; color: var(--muted); font-size: 0.95rem; }
+
+/* Tabla tipo Airtable */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 0.88rem; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 0.72rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--paper); white-space: nowrap; }
+td.id { font-family: var(--f-mono); font-size: 0.8rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.reac { min-width: 220px; }
+tr:last-child td { border-bottom: 0; }
+.pill { display: inline-block; font: 500 0.74rem var(--f-mono); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.alta { background: var(--danger-soft); color: var(--danger); }
+.pill.media { background: var(--warn-soft); color: var(--warn); }
+.pill.baja { background: var(--ok-soft); color: var(--ok); }
+.pill.comp { background: var(--teal-soft); color: var(--teal); }
+.pill.pend { background: var(--yellow-soft); color: var(--ink); border: 1px solid var(--yellow); }
+.caption { margin-top: 10px; font-size: 0.85rem; color: var(--muted); }
+
+/* Flujo */
+.flow { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+.flow li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding-block: 18px; border-bottom: 1px solid var(--line); counter-increment: step; }
+.flow li > div { min-width: 0; }
+.flow li:last-child { border-bottom: 0; }
+.flow li::before { content: counter(step); font: 800 1.5rem/1 var(--f-display); color: var(--teal); }
+.flow li.human::before { content: "✓"; color: var(--yellow-ink); background: var(--yellow); width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 1rem; }
+.flow h3 { font-size: 1.12rem; font-weight: 700; }
+.flow .mod { font-family: var(--f-mono); font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+.flow p { margin-top: 6px; font-size: 0.98rem; max-width: 40em; }
+
+/* Reglas */
+.rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.rules > div { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 18px; min-width: 0; }
+.rules h3 { font-size: 1.05rem; font-weight: 700; }
+.rules ul { margin: 10px 0 0; padding-left: 18px; display: grid; gap: 6px; font-size: 0.95rem; line-height: 1.45; }
+.rules p { margin-top: 8px; font-size: 0.95rem; color: var(--muted); line-height: 1.5; }
+.rules .yes li::marker { content: "+  "; color: var(--ok); font-family: var(--f-mono); }
+.rules .no li::marker { content: "−  "; color: var(--danger); font-family: var(--f-mono); }
+
+.decisions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px 32px; }
+.decisions > div { min-width: 0; border-top: 3px solid var(--yellow); padding-top: 14px; }
+.decisions h3 { font-size: 1.05rem; font-weight: 700; }
+.decisions p { margin-top: 8px; font-size: 0.97rem; color: var(--muted); }
+
+/* Contacto */
+.contact { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding-block: 48px 64px; border-top: 1px solid var(--line); }
+.contact h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+.mail { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.mail code { font-size: 0.95rem; padding: 8px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 4px; user-select: all; word-break: break-all; color: var(--ink); }
+.btn { font: 700 0.92rem var(--f-display); background: var(--ink); color: var(--paper); border: 0; border-radius: 4px; padding: 9px 14px; cursor: pointer; }
+footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
+
+@media (max-width: 880px) {
+  .hero { grid-template-columns: 1fr; gap: 36px; padding-block: 36px 48px; }
+  .block-grid { grid-template-columns: 1fr; gap: 20px; }
+  .rules, .decisions { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .facts { grid-template-columns: 1fr; }
+  .fields { grid-template-columns: 1fr; }
+  section.block { padding-block: 44px; }
+  .pipe li { grid-template-columns: 22px 1fr; }
+  .pipe li .t { grid-column: 2; text-align: left; max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="who">Ricardo Ferrando Gómez <span>· Farmacéutico</span></div>
+    <nav aria-label="Secciones">
+      <a href="#demo">Demo</a>
+      <a href="#base">Resultados</a>
+      <a href="#flujo">Cómo funciona</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="demo">
+      <div>
+        <p class="label">Proyecto · Farmacovigilancia</p>
+        <h1>Screening automático de literatura para detectar <em>reacciones adversas</em></h1>
+        <p class="lede">Construí un escenario en Make que busca en PubMed los artículos nuevos sobre un fármaco, descarga cada abstract y pide a Gemini que decida si describe una sospecha de reacción adversa a ese fármaco. Los casos positivos llegan a Airtable para que un farmacéutico los revise.</p>
+        <div class="stack" aria-label="Herramientas">
+          <span class="chip">Make</span><span class="chip">PubMed E-utilities</span><span class="chip">Gemini 3.5 Flash</span><span class="chip">Airtable</span><span class="chip">JSON</span>
+        </div>
+        <div class="facts">
+          <div><b>16</b><span>artículos con sospecha de RAM registrados</span></div>
+          <div><b>6</b><span>ya comprobados en revisión farmacéutica</span></div>
+          <div><b>15 min</b><span>entre ejecuciones del escenario programado</span></div>
+        </div>
+      </div>
+
+      <div class="yc" aria-labelledby="yc-title">
+        <div class="yc-head">
+          <h2 id="yc-title">Screening de un artículo</h2>
+          <span class="mono" id="yc-id"></span>
+        </div>
+        <div class="cases" role="group" aria-label="Elegir ejemplo">
+          <button type="button" id="c0" data-i="0" aria-pressed="true">Con RAM</button>
+          <button type="button" id="c1" data-i="1" aria-pressed="false">Fármaco concomitante</button>
+          <button type="button" id="c2" data-i="2" aria-pressed="false">Artículo repetido</button>
+        </div>
+        <div class="fields">
+          <div class="field"><small>Término buscado</small><div id="f-term"></div></div>
+          <div class="field"><small>PMID</small><div id="f-pmid"></div></div>
+          <div class="field full"><small>Artículo</small><div id="f-art"></div></div>
+        </div>
+        <button type="button" class="run" id="run">Ejecutar el escenario</button>
+        <div class="panel">
+          <ol class="pipe" id="pipe">
+            <li><span class="dot">1</span><span>PubMed ESearch: artículos de los últimos 30 días</span><span class="t"></span></li>
+            <li><span class="dot">2</span><span>Iterador: un PMID cada vez</span><span class="t"></span></li>
+            <li><span class="dot">3</span><span>Airtable: filtro antiduplicados</span><span class="t"></span></li>
+            <li><span class="dot">4</span><span>PubMed EFetch: descarga del abstract</span><span class="t"></span></li>
+            <li><span class="dot">5</span><span>Gemini: screening de RAM</span><span class="t"></span></li>
+            <li><span class="dot">6</span><span>Router: crear registro si hay RAM</span><span class="t"></span></li>
+            <li><span class="dot">7</span><span>Revisión farmacéutica</span><span class="t"></span></li>
+          </ol>
+          <div id="json-box" hidden>
+            <p class="json-label">Respuesta de Gemini</p>
+            <pre class="json" id="json"></pre>
+          </div>
+        </div>
+        <p class="note">Reproducción de ejecuciones reales del escenario. Los PMID enlazan al artículo en PubMed.</p>
+      </div>
+    </section>
+
+    <section class="block" id="base" aria-labelledby="tabla-t">
+      <div class="block-grid">
+        <div class="side">
+          <h2 id="tabla-t">Lo que ha encontrado</h2>
+          <p>Registros de la tabla "RAM estado" en Airtable. Cada uno entra como pendiente y pasa a comprobado cuando reviso el artículo.</p>
+        </div>
+        <div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>PMID</th><th>Fármaco</th><th>Reacción descrita</th><th>Gravedad</th><th>Revisión</th></tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+          <p class="caption">Artículos registrados con enlace a PubMed, del más reciente al más antiguo. Instantánea de la base a 28 de octubre de 2026.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="flujo" aria-labelledby="flujo-t">
+      <div class="block-grid">
+        <div class="side">
+          <h2 id="flujo-t">Cómo funciona</h2>
+          <p>Los módulos del escenario "Detección RAM", en el orden en que se ejecutan. Está configurado para ejecutarse cada 15 minutos.</p>
+        </div>
+        <ol class="flow">
+          <li><div><h3>Búsqueda en PubMed</h3><div class="mod">HTTP · eutils/esearch.fcgi</div><p>Consulta la base de datos de PubMed con el nombre del fármaco vigilado (por ejemplo, tacrolimus) y recupera los PMID de hasta cinco artículos publicados en los últimos 30 días.</p></div></li>
+          <li><div><h3>Un artículo cada vez</h3><div class="mod">Iterator</div><p>Separa la lista de PMID para que cada artículo recorra el resto del escenario por su cuenta.</p></div></li>
+          <li><div><h3>Filtro antiduplicados</h3><div class="mod">Airtable · Search Records + filtro</div><p>Busca el PMID en la tabla. Si ya existe, el artículo se detiene aquí y no se vuelve a analizar.</p></div></li>
+          <li><div><h3>Descarga del abstract</h3><div class="mod">HTTP · eutils/efetch.fcgi</div><p>Obtiene el texto del abstract en formato plano, que es lo que leerá el modelo.</p></div></li>
+          <li><div><h3>Screening con IA</h3><div class="mod">Gemini 3.5 Flash · temperatura 0</div><p>El modelo actúa como experto en farmacovigilancia y screening de literatura, aplica las reglas de filtrado y devuelve un JSON con cinco campos fijos.</p></div></li>
+          <li><div><h3>Lectura del resultado</h3><div class="mod">JSON · Parse JSON</div><p>Convierte la respuesta en datos que Make puede usar en los filtros y en Airtable.</p></div></li>
+          <li><div><h3>Registro del caso</h3><div class="mod">Router + Airtable · Create Record</div><p>Solo si <code>ram_detectada</code> es verdadero se crea el registro con fármaco, reacción, gravedad, justificación, PMID y enlace, con estatus PENDIENTE.</p></div></li>
+          <li class="human"><div><h3>Revisión farmacéutica</h3><div class="mod">Airtable · Estatus</div><p>Leo cada artículo pendiente y lo marco como COMPROBADO cuando confirmo la sospecha. La IA prioriza; la decisión es humana.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="rules-t">
+      <div class="block-grid">
+        <div class="side">
+          <h2 id="rules-t">Reglas de screening</h2>
+          <p>En farmacovigilancia, revisar la literatura es una obligación: las GVP de la EMA (Módulo VI) piden a los titulares de autorización hacerlo al menos una vez por semana. El reto es separar las sospechas reales del ruido.</p>
+        </div>
+        <div class="rules">
+          <div class="yes">
+            <h3>Cuenta como RAM</h3>
+            <ul>
+              <li>Hay una sospecha directa o una relación causal descrita entre el fármaco y el acontecimiento adverso.</li>
+              <li>Si el texto describe varias reacciones, se registran todas juntas.</li>
+            </ul>
+          </div>
+          <div class="no">
+            <h3>No cuenta como RAM</h3>
+            <ul>
+              <li>El fármaco aparece solo como antecedente, tratamiento previo o terapia concomitante.</li>
+              <li>El estudio trata de otro fármaco y el vigilado solo se menciona de pasada.</li>
+            </ul>
+          </div>
+          <div style="grid-column: 1 / -1">
+            <h3>Salida estructurada</h3>
+            <p>El modelo responde solo con JSON: <code>ram_detectada</code>, <code>farmaco_principal_estudio</code>, <code>reaccion</code>, <code>gravedad</code> (alta, media o baja) y <code>justificacion_breve</code>, una frase que explica la decisión y facilita la revisión.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="dec-t">
+      <div class="block-grid">
+        <div class="side"><h2 id="dec-t">Decisiones de diseño</h2></div>
+        <div class="decisions">
+          <div><h3>Comprobar antes de analizar</h3><p>El filtro antiduplicados va antes de descargar el abstract y de llamar a la IA, así cada artículo se procesa una sola vez y no se gastan llamadas.</p></div>
+          <div><h3>Temperatura 0</h3><p>El mismo abstract debe dar siempre la misma respuesta. En screening importa más la reproducibilidad que la creatividad.</p></div>
+          <div><h3>Reglas negativas explícitas</h3><p>Decir al modelo qué no es una RAM reduce los falsos positivos por fármacos concomitantes o menciones de pasada.</p></div>
+          <div><h3>Revisión humana obligatoria</h3><p>Todo entra como pendiente. La justificación de la IA acelera la revisión, pero no la sustituye.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="contact" id="contacto" aria-labelledby="contact-t">
+    <div>
+      <p class="label">Contacto</p>
+      <h2 id="contact-t" style="margin-top:8px">¿Hablamos de farmacovigilancia?</h2>
+    </div>
+    <div class="mail">
+      <a href="mailto:ricardoferrandogomez@gmail.com"><code id="mail">ricardoferrandogomez@gmail.com</code></a>
+      <button type="button" class="btn" id="copy">Copiar</button>
+    </div>
+  </section>
+  <footer>Ricardo Ferrando Gómez · Graduado en Farmacia · Albacete</footer>
+</div>
+
+<script>
+(function () {
+  var records = [
+    ["42460731", "Fenitoína", "Hiperostosis difusa de la bóveda craneal, remodelación ósea craneal", "media", "COMPROBADO"],
+    ["42485011", "Fármacos antiepilépticos", "Síndrome de Stevens-Johnson, necrólisis epidérmica tóxica", "alta", "COMPROBADO"],
+    ["42300120", "Tacrolimus", "Lesión renal aguda (AKI)", "alta", "COMPROBADO"],
+    ["42149737", "NSAIDs/paracetamol", "Hipersensibilidad", "media", "COMPROBADO"],
+    ["42136687", "Lenvatinib plus Pembrolizumab", "Estomatitis, síndrome mano-pie, artritis, hipotiroidismo, anorexia, fatiga, fiebre", "media", "COMPROBADO"],
+    ["42136977", "Pembrolizumab", "Toxicidad mediada por el sistema inmune (elevación de troponina T y afectación muscular)", "media", "COMPROBADO"],
+    ["42131669", "Inmunosupresores", "Trastorno linfoproliferativo postrasplante (PTLD), linfoma difuso de células B grandes (DLBCL)", "alta", "PENDIENTE"],
+    ["42125827", "Vandetanib", "Alteraciones dermatoscópicas de nevos melanocíticos", "media", "PENDIENTE"],
+    ["42129168", "Maveropepimut-S, pembrolizumab, ciclofosfamida", "Reacciones en el sitio de inyección", "baja", "PENDIENTE"],
+    ["42112045", "Linezolid, rifampicina, fluoroquinolonas, trimetoprima-sulfametoxazol, amoxicilina-clavulanato, tetraciclinas, amoxicilina", "Eventos gastrointestinales, hiperpotasemia, nefrotoxicidad, supresión de la médula ósea", "alta", "PENDIENTE"],
+    ["42112729", "Prednisolona, dexametasona, levofloxacino", "Eventos neurológicos, eventos gastrointestinales, eventos hepáticos", "media", "PENDIENTE"]
+  ];
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function link(p) { return '<a href="https://pubmed.ncbi.nlm.nih.gov/' + p + '/" target="_blank" rel="noopener">' + p + '</a>'; }
+  var tbody = document.getElementById("rows");
+  tbody.innerHTML = records.map(function (r) {
+    var g = r[3], cap = g.charAt(0).toUpperCase() + g.slice(1);
+    var comp = r[4] === "COMPROBADO";
+    return '<tr><td class="id">' + link(r[0]) + '</td><td>' + esc(r[1]) + '</td><td class="reac">' + esc(r[2]) + '</td>' +
+      '<td><span class="pill ' + g + '">' + cap + '</span></td>' +
+      '<td><span class="pill ' + (comp ? 'comp">Comprobado' : 'pend">Pendiente') + '</span></td></tr>';
+  }).join("");
+
+  var cases = [
+    { term: "tacrolimus", pmid: "42300120",
+      art: "Estudio sobre la exposición a tacrolimus y la aparición de lesión renal aguda.",
+      steps: [["done", "5 PMID"], ["done", "PMID 42300120"], ["done", "Nuevo"], ["done", "Abstract"], ["done", "RAM detectada"], ["done", "Registro creado"], ["done", "Comprobado"]],
+      json: { ram_detectada: true, farmaco_principal_estudio: "tacrolimus", reaccion: "lesión renal aguda (AKI)", gravedad: "alta",
+        justificacion_breve: "El estudio analiza la relación entre la exposición/concentración de tacrolimus y la aparición de lesión renal aguda (AKI) como un evento adverso de interés." } },
+    { term: "tacrolimus", pmid: "42305014",
+      art: "Ensayo clínico de xenotrasplante de islotes porcinos (Xenotransplantation, 2026). El tacrolimus forma parte de la inmunosupresión.",
+      steps: [["done", "5 PMID"], ["done", "PMID 42305014"], ["done", "Nuevo"], ["done", "Abstract"], ["done", "Sin RAM del fármaco"], ["stop", "Descartado"], ["skip", "—"]],
+      json: { ram_detectada: false, farmaco_principal_estudio: "Xenotrasplante de islotes porcinos", reaccion: "N/A", gravedad: "baja",
+        justificacion_breve: "Tacrolimus se menciona únicamente como parte del régimen de inmunosupresión concomitante, sin que se… [recortado]" } },
+    { term: "tacrolimus", pmid: "42300120",
+      art: "El mismo artículo del primer ejemplo, devuelto otra vez por PubMed en una ejecución posterior.",
+      steps: [["done", "5 PMID"], ["done", "PMID 42300120"], ["stop", "Ya registrado"], ["skip", "—"], ["skip", "—"], ["skip", "—"], ["skip", "—"]],
+      json: null }
+  ];
+
+  var current = 0, running = false;
+  var btns = document.querySelectorAll(".cases button");
+  var steps = document.querySelectorAll("#pipe li");
+  var jsonBox = document.getElementById("json-box"), jsonEl = document.getElementById("json");
+
+  function resetPipe() {
+    steps.forEach(function (li, k) { li.className = ""; li.querySelector(".dot").textContent = k + 1; li.querySelector(".t").textContent = ""; });
+    jsonBox.hidden = true;
+  }
+  function show(i) {
+    current = i; var c = cases[i];
+    document.getElementById("yc-id").textContent = "Detección RAM";
+    document.getElementById("f-term").textContent = c.term;
+    document.getElementById("f-pmid").innerHTML = link(c.pmid);
+    document.getElementById("f-art").textContent = c.art;
+    btns.forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.i === i)); });
+    document.getElementById("run").textContent = "Ejecutar el escenario";
+    resetPipe();
+  }
+  function renderJSON(o) {
+    var lines = Object.keys(o).map(function (k) {
+      var v = o[k];
+      return '  <span class="k">"' + k + '"</span>: ' + (typeof v === "string" ? '"' + esc(v) + '"' : String(v));
+    });
+    jsonEl.innerHTML = "{\n" + lines.join(",\n") + "\n}";
+  }
+  btns.forEach(function (b) { b.addEventListener("click", function () { if (!running) show(+b.dataset.i); }); });
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var runBtn = document.getElementById("run");
+  runBtn.addEventListener("click", function () {
+    if (running) return;
+    running = true; runBtn.disabled = true; resetPipe();
+    var c = cases[current], k = 0, delay = reduce ? 0 : 600;
+    (function next() {
+      if (k > 0) {
+        var prev = steps[k - 1], st = c.steps[k - 1];
+        prev.className = st[0];
+        prev.querySelector(".dot").textContent = st[0] === "done" ? "✓" : st[0] === "stop" ? "×" : k;
+        prev.querySelector(".t").textContent = st[1];
+        if (k - 1 === 4 && c.json && st[0] === "done") { renderJSON(c.json); jsonBox.hidden = false; }
+      }
+      if (k < steps.length) {
+        if (c.steps[k][0] === "skip") { k++; next(); return; }
+        steps[k].className = "active"; k++; setTimeout(next, delay); return;
+      }
+      running = false; runBtn.disabled = false; runBtn.textContent = "Ejecutar de nuevo";
+    })();
+  });
+  show(0);
+
+  document.getElementById("copy").addEventListener("click", function () {
+    var t = document.getElementById("mail").textContent, b = this;
+    function sel() { var r = document.createRange(); r.selectNodeContents(document.getElementById("mail")); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+    try {
+      navigator.clipboard.writeText(t).then(function () { b.textContent = "Copiado"; }, function () { sel(); b.textContent = "Seleccionado"; });
+    } catch (e) { sel(); b.textContent = "Seleccionado"; }
+  });
+})();
+</script>
+</body>
+</html>
