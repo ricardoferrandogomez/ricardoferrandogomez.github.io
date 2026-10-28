@@ -163,6 +163,8 @@ th { font: 500 0.72rem var(--f-mono); letter-spacing: .06em; text-transform: upp
 td.id { font-family: var(--f-mono); font-size: 0.8rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
 td.reac { min-width: 220px; }
 tr:last-child td { border-bottom: 0; }
+tr.fresh td { animation: flash 3s ease-out; }
+@keyframes flash { 0%, 40% { background: var(--yellow-soft); } 100% { background: transparent; } }
 .pill { display: inline-block; font: 500 0.74rem var(--f-mono); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
 .pill.alta { background: var(--danger-soft); color: var(--danger); }
 .pill.media { background: var(--warn-soft); color: var(--warn); }
@@ -243,7 +245,7 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
           <span class="chip">Make</span><span class="chip">PubMed E-utilities</span><span class="chip">Gemini 3.5 Flash</span><span class="chip">Airtable</span><span class="chip">JSON</span>
         </div>
         <div class="facts">
-          <div><b>16</b><span>artículos con sospecha de RAM registrados</span></div>
+          <div><b id="n-total">17</b><span>artículos con sospecha de RAM registrados</span></div>
           <div><b>6</b><span>ya comprobados en revisión farmacéutica</span></div>
           <div><b>15 min</b><span>entre ejecuciones del escenario programado</span></div>
         </div>
@@ -295,6 +297,7 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
                 <tr><th>PMID</th><th>Fármaco</th><th>Reacción descrita</th><th>Gravedad</th><th>Revisión</th></tr>
               </thead>
               <tbody id="rows">
+<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42946329/" target="_blank" rel="noopener">42946329</a></td><td>Pembrolizumab</td><td class="reac">Meningitis por Listeria monocytogenes, neutropenia febril, diarrea</td><td><span class="pill alta">Alta</span></td><td><span class="pill pend">Pendiente</span></td></tr>
 <tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42460731/" target="_blank" rel="noopener">42460731</a></td><td>Fenitoína</td><td class="reac">Hiperostosis difusa de la bóveda craneal, remodelación ósea craneal</td><td><span class="pill media">Media</span></td><td><span class="pill comp">Comprobado</span></td></tr>
 <tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42485011/" target="_blank" rel="noopener">42485011</a></td><td>Fármacos antiepilépticos</td><td class="reac">Síndrome de Stevens-Johnson, necrólisis epidérmica tóxica</td><td><span class="pill alta">Alta</span></td><td><span class="pill comp">Comprobado</span></td></tr>
 <tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42300120/" target="_blank" rel="noopener">42300120</a></td><td>Tacrolimus</td><td class="reac">Lesión renal aguda (AKI)</td><td><span class="pill alta">Alta</span></td><td><span class="pill comp">Comprobado</span></td></tr>
@@ -309,7 +312,7 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
 </tbody>
             </table>
           </div>
-          <p class="caption">Artículos registrados con enlace a PubMed, del más reciente al más antiguo. Instantánea de la base a 28 de octubre de 2026.</p>
+          <p class="caption">Artículos registrados con enlace a PubMed, del más reciente al más antiguo. Las sospechas que encuentre el buscador se añaden arriba al momento.</p>
         </div>
       </div>
     </section>
@@ -391,6 +394,7 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
 <script>
 (function () {
   var records = [
+    ["42946329", "Pembrolizumab", "Meningitis por Listeria monocytogenes, neutropenia febril, diarrea", "alta", "PENDIENTE"],
     ["42460731", "Fenitoína", "Hiperostosis difusa de la bóveda craneal, remodelación ósea craneal", "media", "COMPROBADO"],
     ["42485011", "Fármacos antiepilépticos", "Síndrome de Stevens-Johnson, necrólisis epidérmica tóxica", "alta", "COMPROBADO"],
     ["42300120", "Tacrolimus", "Lesión renal aguda (AKI)", "alta", "COMPROBADO"],
@@ -467,7 +471,22 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
     }
     if (d.justificacion) html += '<p>' + esc(d.justificacion) + '</p>';
     body.innerHTML = html;
+    if (ram || d.origen === "en_base") addRow(d);
     return d.origen === "en_base" ? "base" : ram ? "ram" : "no";
+  }
+  function addRow(d) {
+    var pmid = String(d.pmid || "");
+    if (!/^\d+$/.test(pmid) || tbody.querySelector('a[href*="/' + pmid + '/"]')) return;
+    var g = String(d.gravedad || "").toLowerCase().trim();
+    var grav = ["alta", "media", "baja"].indexOf(g) >= 0 ? '<span class="pill ' + g + '">' + cap(g) + '</span>' : "";
+    var comp = String(d.estatus || "").toUpperCase() === "COMPROBADO";
+    var tr = document.createElement("tr");
+    tr.className = "fresh";
+    tr.innerHTML = '<td class="id">' + link(pmid) + '</td><td>' + esc(cap(d.farmaco)) + '</td><td class="reac">' + esc(cap(d.reaccion)) + '</td>' +
+      '<td>' + grav + '</td><td><span class="pill ' + (comp ? 'comp">Comprobado' : 'pend">Pendiente') + '</span></td>';
+    tbody.insertBefore(tr, tbody.firstChild);
+    var n = document.getElementById("n-total");
+    if (n && d.origen !== "en_base") n.textContent = String(+n.textContent + 1);
   }
   function fail(li, msg) {
     li.classList.remove("loading");
