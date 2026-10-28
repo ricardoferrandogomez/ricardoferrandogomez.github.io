@@ -245,7 +245,7 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
           <span class="chip">Make</span><span class="chip">PubMed E-utilities</span><span class="chip">Gemini 3.5 Flash</span><span class="chip">Airtable</span><span class="chip">JSON</span>
         </div>
         <div class="facts">
-          <div><b id="n-total">17</b><span>artículos con sospecha de RAM registrados</span></div>
+          <div><b id="n-total">9</b><span>artículos con sospecha de RAM registrados</span></div>
           <div><b>6</b><span>ya comprobados en revisión farmacéutica</span></div>
           <div><b>15 min</b><span>entre ejecuciones del escenario programado</span></div>
         </div>
@@ -304,11 +304,6 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
 <tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42149737/" target="_blank" rel="noopener">42149737</a></td><td>NSAIDs/paracetamol</td><td class="reac">Hipersensibilidad</td><td><span class="pill media">Media</span></td><td><span class="pill comp">Comprobado</span></td></tr>
 <tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42136687/" target="_blank" rel="noopener">42136687</a></td><td>Lenvatinib plus Pembrolizumab</td><td class="reac">Estomatitis, síndrome mano-pie, artritis, hipotiroidismo, anorexia, fatiga, fiebre</td><td><span class="pill media">Media</span></td><td><span class="pill comp">Comprobado</span></td></tr>
 <tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42136977/" target="_blank" rel="noopener">42136977</a></td><td>Pembrolizumab</td><td class="reac">Toxicidad mediada por el sistema inmune (elevación de troponina T y afectación muscular)</td><td><span class="pill media">Media</span></td><td><span class="pill comp">Comprobado</span></td></tr>
-<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42131669/" target="_blank" rel="noopener">42131669</a></td><td>Inmunosupresores</td><td class="reac">Trastorno linfoproliferativo postrasplante (PTLD), linfoma difuso de células B grandes (DLBCL)</td><td><span class="pill alta">Alta</span></td><td><span class="pill pend">Pendiente</span></td></tr>
-<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42125827/" target="_blank" rel="noopener">42125827</a></td><td>Vandetanib</td><td class="reac">Alteraciones dermatoscópicas de nevos melanocíticos</td><td><span class="pill media">Media</span></td><td><span class="pill pend">Pendiente</span></td></tr>
-<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42129168/" target="_blank" rel="noopener">42129168</a></td><td>Maveropepimut-S, pembrolizumab, ciclofosfamida</td><td class="reac">Reacciones en el sitio de inyección</td><td><span class="pill baja">Baja</span></td><td><span class="pill pend">Pendiente</span></td></tr>
-<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42112045/" target="_blank" rel="noopener">42112045</a></td><td>Linezolid, rifampicina, fluoroquinolonas, trimetoprima-sulfametoxazol, amoxicilina-clavulanato, tetraciclinas, amoxicilina</td><td class="reac">Eventos gastrointestinales, hiperpotasemia, nefrotoxicidad, supresión de la médula ósea</td><td><span class="pill alta">Alta</span></td><td><span class="pill pend">Pendiente</span></td></tr>
-<tr><td class="id"><a href="https://pubmed.ncbi.nlm.nih.gov/42112729/" target="_blank" rel="noopener">42112729</a></td><td>Prednisolona, dexametasona, levofloxacino</td><td class="reac">Eventos neurológicos, eventos gastrointestinales, eventos hepáticos</td><td><span class="pill media">Media</span></td><td><span class="pill pend">Pendiente</span></td></tr>
 </tbody>
             </table>
           </div>
@@ -400,12 +395,7 @@ footer { padding-block: 0 32px; font-size: 0.82rem; color: var(--muted); }
     ["42300120", "Tacrolimus", "Lesión renal aguda (AKI)", "alta", "COMPROBADO"],
     ["42149737", "NSAIDs/paracetamol", "Hipersensibilidad", "media", "COMPROBADO"],
     ["42136687", "Lenvatinib plus Pembrolizumab", "Estomatitis, síndrome mano-pie, artritis, hipotiroidismo, anorexia, fatiga, fiebre", "media", "COMPROBADO"],
-    ["42136977", "Pembrolizumab", "Toxicidad mediada por el sistema inmune (elevación de troponina T y afectación muscular)", "media", "COMPROBADO"],
-    ["42131669", "Inmunosupresores", "Trastorno linfoproliferativo postrasplante (PTLD), linfoma difuso de células B grandes (DLBCL)", "alta", "PENDIENTE"],
-    ["42125827", "Vandetanib", "Alteraciones dermatoscópicas de nevos melanocíticos", "media", "PENDIENTE"],
-    ["42129168", "Maveropepimut-S, pembrolizumab, ciclofosfamida", "Reacciones en el sitio de inyección", "baja", "PENDIENTE"],
-    ["42112045", "Linezolid, rifampicina, fluoroquinolonas, trimetoprima-sulfametoxazol, amoxicilina-clavulanato, tetraciclinas, amoxicilina", "Eventos gastrointestinales, hiperpotasemia, nefrotoxicidad, supresión de la médula ósea", "alta", "PENDIENTE"],
-    ["42112729", "Prednisolona, dexametasona, levofloxacino", "Eventos neurológicos, eventos gastrointestinales, eventos hepáticos", "media", "PENDIENTE"]
+    ["42136977", "Pembrolizumab", "Toxicidad mediada por el sistema inmune (elevación de troponina T y afectación muscular)", "media", "COMPROBADO"]
   ];
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function link(p) { return '<a href="https://pubmed.ncbi.nlm.nih.gov/' + p + '/" target="_blank" rel="noopener">' + p + '</a>'; }
